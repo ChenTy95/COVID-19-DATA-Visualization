@@ -11,11 +11,13 @@
 
 <body>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-    <div id="main" style="width: 800px; height:600px;"></div>
+    <div id="main" style="width: 800px; height:600px; float: left;"></div>
+    <div id="detail" style="width: 600px; height: 400px; float: left;"></div>
 
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
+        var myChartDetail = echarts.init(document.getElementById('detail'));
 
         // 指定图表的配置项和数据
         option = {
@@ -29,7 +31,7 @@
             },
             visualMap: {
                 min: 0,
-                max: 10000,
+                //max: 10000,
                 left: 'left',
                 top: 'bottom',
                 calculable: true
@@ -65,38 +67,132 @@
             ]
         };
 
+        optionDetail = {
+            title: {
+                text: '带时间轴的折线图',
+                subtext: '带时间轴的折线图',
+                x: 'center',
+                align: 'right'
+            },
+            grid: {
+                bottom: 80
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false
+                }
+            },
+            dataZoom: [
+                {
+                    show: true,
+                    realtime: true,
+                    start: 0,
+                    end: 50
+                },
+                {
+                    type: 'inside',
+                    realtime: true,
+                    start: 0,
+                    end: 50
+                }
+            ],
+            //x轴时间轴
+            xAxis: [
+                {
+                    type: 'category',
+                    data: []
+                }
+            ],
+            yAxis: [
+                {
+                    name: '累计确诊',
+                    type: 'value'
+                }
+            ],
+            //y轴
+            series: [
+                {
+                    name: '确诊人数',
+                    type: 'line',
+                    animation: false,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    lineStyle: {
+                        normal: {
+                            width: 1
+                        }
+                    },
+                    data: []
+                }
+            ]
+        };
+
         // 使用刚指定的配置项和数据显示图表。
         myChart.setOption(option);
+        myChartDetail.setOption(optionDetail);
 
-        // 异步加载
-        // $.ajax({
-        //     method: "GET",
-        //     url: "http://localhost:8684/COVID-19-DATA-WS.asmx/GetChinaProvincetDateData?date=2020-06-30&dataType=1",
-        //     dataType: "json",
-        //     success: function (data) {
-        //         alert(data);
-        //         myChart.setOption({
-        //             title: {
-        //                 subtext: '2020-06-30'
-        //             },
-        //             series: [{
-        //                 data: data
-        //             }]
-        //         });
-        //     }
-        // });
-        $.get('http://localhost:8684/COVID-19-DATA-WS.asmx/GetChinaProvincetDateData?date=2020-06-30&dataType=1').done(function (data) {
-            alert(data);
-            alert($(data).find('string[xmlns="http://tempuri.org/"]'));
-            myChart.setOption({
-                title: {
-                    subtext: '2020-06-30'
-                },
-                series: [{
-                    data: data
-                }]
+        function getMaxValue(array) {
+            var minValue = 0;
+            array.forEach(element => {
+                if (element["value"] < 60000 && element["value"] > minValue) minValue = element["value"];
+            });
+            return minValue;
+        }
+
+        // ajax 获取数据并加载
+        $.ajax({
+            method: "GET",
+            url: "http://localhost:8684/COVID-19-DATA-WS.asmx/GetChinaProvincetDateData?date=2020-06-30&dataType=1",
+            dataType: "json",
+            success: function (json) {
+                console.log(json[1]["value"]);
+                myChart.setOption({
+                    title: {
+                        subtext: '2020-06-30'
+                    },
+                    series: [{
+                        data: json
+                    }],
+                    visualMap: {
+                        max: getMaxValue(json) + 3000
+                    }
+                });
+            }
+        });
+
+        myChart.on('click', function (param) {
+            //这个params可以获取你要的图中的当前点击的项的参数
+            console.log(param.data['name']);
+            $.ajax({
+                method: "GET",
+                url: "http://localhost:8684/COVID-19-DATA-WS.asmx/GetEachProvinceTimeSeriesData?date=2020-06-30&dataType=1&provinceName=" + param.data['name'],
+                dataType: "json",
+                success: function (json) {
+                    var arr = json;
+                    myChartDetail.setOption({
+                        title: {
+                            text: param.data['name'] + "累计确诊人数",
+                            subtext: '2020-06-30'
+                        },
+                        xAxis: [{
+                            data: JSON.parse(arr)[0]
+                        }],
+                        series: [{
+                            data: JSON.parse(arr)[1]
+                        }]
+                    });
+                }
             });
         });
+
+
     </script>
 </body>
 

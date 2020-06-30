@@ -50,9 +50,8 @@ namespace COVID_19_DATA_WS
         }
 
         [WebMethod(Description = "获取中国各省级行政区截至某日数据")]
-        [System.Web.Script.Services.ScriptMethod(ResponseFormat = System.Web.Script.Services.ResponseFormat.Json)]
         // dataType 用于选择数据类型 0-全部数据 1-累计确诊 2-现存确诊 3-累计治愈 4-累计死亡
-        public string GetChinaProvincetDateData(string date, int dataType)
+        public void GetChinaProvincetDateData(string date, int dataType)
         {
             string[] dataTypeArr =
                 { "t.province_confirmedCount, t.province_confirmedCount - t.province_curedCount - t.province_deadCount as province_currentCount, t.province_curedCount, t.province_deadCount",
@@ -77,10 +76,41 @@ namespace COVID_19_DATA_WS
             dt.Columns.Remove("date");
             dt.Columns.Remove("updateTime");
 
-            return JsonConvert.SerializeObject(dt);
+            HttpContext.Current.Response.Write(JsonConvert.SerializeObject(dt));
         }
 
+        [WebMethod(Description = "获取中国省级行政区截至某日的时间序列数据")]
+        // dataType 用于选择数据类型 0-全部数据 1-累计确诊 2-现存确诊 3-累计治愈 4-累计死亡
+        public void GetEachProvinceTimeSeriesData(string provinceName, string date, int dataType)
+        {
+            string[] dataTypeArr =
+                { "t.province_confirmedCount, t.province_confirmedCount - t.province_curedCount - t.province_deadCount as province_currentCount, t.province_curedCount, t.province_deadCount",
+                  "t.province_confirmedCount as value",
+                  "t.province_confirmedCount - t.province_curedCount - t.province_deadCount as value",
+                  "t.province_curedCount as value",
+                  "t.province_deadCount as value"};
 
+            string sql =
+                  @"SELECT s.standardName as name,
+                           t.provinceEnglishName," + dataTypeArr[dataType] + @",
+                           substr(t.updateTime, 0, 11) AS date,
+                           max(t.updateTime) AS updateTime
+                      FROM China t, Std_Name s
+                     WHERE t.provinceName = s.provinceName AND date <= '" + date + @"' AND s.standardName = '" + provinceName + @"'
+                  GROUP BY date
+                  ORDER BY date ASC";
+
+            DataTable dt = ExecuteSQL(sql);
+
+            dt.Columns.Remove("provinceEnglishName");
+            dt.Columns.Remove("updateTime");
+
+            List<long> valueY = dt.AsEnumerable().Select(d => d.Field<long>("value")).ToList();
+            List<string> dateX = dt.AsEnumerable().Select(d => d.Field<string>("date")).ToList();
+            string returnJson = "[" + JsonConvert.SerializeObject(dateX) + "," + JsonConvert.SerializeObject(valueY) + "]";
+
+            HttpContext.Current.Response.Write(JsonConvert.SerializeObject(returnJson));
+        }
 
 
 
