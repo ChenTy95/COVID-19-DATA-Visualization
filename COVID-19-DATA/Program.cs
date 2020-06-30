@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Data.SQLite;
 using System.Data;
 
@@ -25,6 +26,8 @@ namespace COVID_19_DATA
             ConvertCSV2SQLite(rawCSVDataStr, out string[] fieldName);
             // 分类整理数据库中数据
             DataProcessing(fieldName);
+            // 在数据库中生成 地区名-ECharts 数据映射关系表
+            CreateDataMappingTable();
             // 将此次生成的文件设置为最新文件
             SetCurrentDatabaseFile();
 
@@ -340,6 +343,68 @@ namespace COVID_19_DATA
             catch (Exception ex)
             {
                 Print("Complete Missing Continent Data Error! Exception Message: " + ex.ToString());
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        // 生成 地区名-ECharts 数据映射表
+        private static void CreateDataMappingTable()
+        {
+            // 中国省级行政区 - 去掉省/市/自治区内容
+            DataTable dtProvinceName = ExecuteSQL("SELECT DISTINCT T.provinceName FROM CHINA T");
+            dtProvinceName.Columns.Add("standardName", typeof(string));
+            for (int i = 0; i < dtProvinceName.Rows.Count; i++)
+            {
+                string pName = dtProvinceName.Rows[i]["provinceName"].ToString();
+                string nName;
+                if (pName.IndexOf("省") > -1)
+                    nName = pName.Replace("省", "");
+                else if (pName.IndexOf("市") > -1)
+                    nName = pName.Replace("市", "");
+                else if (pName.IndexOf("自治区") > -1)
+                {
+                    if (pName.IndexOf("新疆") > -1)
+                        nName = "新疆";
+                    else
+                        nName = Regex.Match(pName, "(.{2,3}?)(.族)?自治区").Groups[1].Value;
+                }
+                else
+                    nName = pName;
+                dtProvinceName.Rows[i]["standardName"] = nName;
+            }
+
+            string sqlCreate = "CREATE TABLE Std_Name (provinceName TEXT, standardName TEXT)";
+            string sqlInsert = "INSERT INTO Std_Name (provinceName, standardName) VALUES (:provinceName, :standardName)";
+
+            SQLiteConnection conn = new SQLiteConnection(ConnStrSQLite);
+            SQLiteCommand cmdCreate = new SQLiteCommand(sqlCreate, conn);
+            SQLiteCommand cmdInsert = new SQLiteCommand(sqlInsert, conn);
+
+            try
+            {
+                conn.Open();
+                cmdCreate.ExecuteNonQuery();
+
+                var transaction = conn.BeginTransaction();
+                for (int i = 0; i < dtProvinceName.Rows.Count; i++)
+                {
+                    cmdInsert.Parameters.Clear();
+                    cmdInsert.Parameters.Add(new SQLiteParameter("provinceName", dtProvinceName.Rows[i]["provinceName"].ToString()));
+                    cmdInsert.Parameters.Add(new SQLiteParameter("standardName", dtProvinceName.Rows[i]["standardName"].ToString()));
+                    cmdInsert.ExecuteNonQuery();
+                }
+                transaction.Commit();
+
+                Print("SQLite Database Create Table [Std_Name] OK!");
+            }
+            catch (Exception ex)
+            {
+                Print("SQLite Database Create Table [Std_Name] Error! Exception Message: " + ex.ToString());
+                Console.ReadLine();
+                Environment.Exit(0);
             }
             finally
             {
