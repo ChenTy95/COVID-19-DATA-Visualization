@@ -6,21 +6,32 @@
     <!-- 引入 ECharts 文件 -->
     <script src="js/jquery-1.8.0.js"></script>
     <script src="js/echarts.min.js"></script>
+    <script src="js/dark.js"></script>
+    <script src="js/infographic.js"></script>
+    <script src="js/roma.js"></script>
     <script src="map/china.js"></script>
+
+    <link rel="stylesheet" href="main.css">
 </head>
 
 <body>
+    <p style="font-family:'OPPOSansR'; font-size: 24px;">123123123123 Test Font Family 字体选择测试 日 国 只</p>
+    <p style="font-size: 24px;">123123123123 Test Font Family 字体选择测试 日 国 只</p>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
     <div id="main" style="width: 800px; height:600px; float: left;"></div>
     <div id="detail" style="width: 600px; height: 400px; float: left;"></div>
 
     <script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('main'));
+        var myChart = echarts.init(document.getElementById('main'), 'roma');
         var myChartDetail = echarts.init(document.getElementById('detail'));
 
         // 指定图表的配置项和数据
         option = {
+            textStyle: {
+                fontFamily: 'OPPOSansR',
+                fontSize: 14
+            },
             title: {
                 text: 'COVID-19 疫情数据 - 累计确诊',
                 subtext: '',
@@ -68,6 +79,9 @@
         };
 
         optionDetail = {
+            textStyle: {
+                fontFamily: 'Arial'
+            },
             title: {
                 text: '带时间轴的折线图',
                 subtext: '带时间轴的折线图',
