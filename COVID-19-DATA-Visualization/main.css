@@ -2,3 +2,13 @@
     font-family: OPPOSansR;
     src: url(font/OPPOSans-R.ttf)
 }
+
+@font-face {
+    font-family: OPPOSansM;
+    src: url(font/OPPOSans-M.ttf)
+}
+
+@font-face {
+    font-family: OPPOSansH;
+    src: url(font/OPPOSans-H.ttf)
+}
