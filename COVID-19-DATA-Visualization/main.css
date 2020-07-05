@@ -15,24 +15,58 @@
 
 body {
     font-family: OPPOSansR;
-    background-color: rgba(242, 234, 191, 0.15);
+    background-color: rgba(242, 234, 191, 0.3);
+}
+
+button {
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border: 2px solid;
+    border-radius: 2px;
+    font-family: OPPOSansM;
+    font-size: 16px;
+    color: #FFF;
+    width: 96px;
+    height: 30px;
+    margin-left: 20px;
+}
+
+#dataTypeSelector {
+    width: 458px;
+    height: 40px;
+    margin: 15px 20px 10px 20px;
+    padding: 0;
+    border-width: 4px;
+    font-size: 18px;
+    font-weight: 900;
+    background-color: rgba(242, 234, 191, 1);
+    color: #893448;
+    cursor: default;
+}
+
+p {
+    font-size: 18px;
+    line-height: 18px;
+    margin: 0em;
+    font-family: OPPOSansM;
 }
 
 div .partDiv {
-    background-color: lightgray;
+    background-color: rgba(242, 234, 191, 0.3);
 }
 
 .partLeft {
     height: inherit;
     float: left;
-    background-color: sandybrown;
+    /* background-color: sandybrown; */
 }
 
 .partRight {
     height: inherit;
     float: left;
     margin-left: 20px;
-    background-color: royalblue;
+    /* background-color: royalblue; */
 }
 
 .centerDiv {
