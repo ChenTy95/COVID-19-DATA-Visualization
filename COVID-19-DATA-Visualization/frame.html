@@ -22,7 +22,7 @@
 <body>
     <div class="centerDiv">
         <div class="topic">
-            <h2>COVID-19 疫情数据可视化 <span id="tyName">&nbsp;&nbsp;山东大学软件学院／陈新源／201944882 </span></h2>
+            <h2>&nbsp;COVID-19 疫情数据可视化 <span id="tyName">&nbsp;&nbsp;山东大学软件学院／陈新源／201944882 </span></h2>
             <h4>《数据可视化技术》期末作业／<svg height="21" alt="GitHub" viewBox="0 0 16 16" version="1.1" width="21"
                     aria-hidden="true">
                     <path fill-rule="evenodd"
@@ -60,16 +60,25 @@
             <div class="partRight" id="barCity" style="width:590px;"></div>
         </div>
         <div class="partDiv" id="worldData" style="height:400px;">
-            <div class="partLeft" id="mapWorld" style="width:800px;"></div>
-            <div class="partRight" style="width:380px;">
-                <div style="height:100px; background-color:blueviolet;"></div>
-                <div id="pieWorld" style="width:380px; height:280px; margin-top:20px; background-color:burlywood;">
+            <div class="partLeft" id="mapWorld" style="width:700px;"></div>
+            <div class="partRight" style="width:480px;">
+                <div id="globalSelector" style="height:110px; background-color:rgba(242, 234, 191, 0.3);">
+                    <button id="dataTypeSelector2">全球 COVID-19 疫情地图 数据类别选择</button>
+                    <button style="background-color:#893448; border-color:#893448;"
+                        onclick="switchWorldData(1);">累计确诊</button>
+                    <button style="background-color:#d95850; border-color:#d95850;"
+                        onclick="switchWorldData(2);">现存确诊</button>
+                    <button style="background-color:#4688eb; border-color:#4688eb;"
+                        onclick="switchWorldData(3);">累计治愈</button>
+                    <button style="background-color:#000000; border-color:#000000;"
+                        onclick="switchWorldData(4);">累计死亡</button>
+                </div>
+                <div id="pieWorld" style="height:270px; margin-top:20px;">
                 </div>
             </div>
         </div>
         <div class="partDiv" id="worldDetailData" style="height:300px;">
-            <div class="partLeft" id="lineWorld" style="width:590px;"></div>
-            <div class="partRight" id="barWorld" style="width:590px;"></div>
+            <div class="partLeft" id="lineWorld" style="width:1200px;"></div>
         </div>
     </div>
 
@@ -171,29 +180,14 @@
                     }
                 ]
             },
-            options: [
-                {
-                    series: [
-                        {
-                            data: [{ name: '山东', value: 2 }]
-                        }
-                    ]
-                },
-                {
-                    series: [
-                        {
-                            data: [{ name: '安徽', value: 20 }]
-                        }
-                    ]
-                }
-            ]
+            options: []
         };
         chartMapChina.setOption(optMapChina);
         // 获取数据并设置
         setMapChina(dataType);
 
         // 设定 Part1 右侧部分中国数据折线图
-        var lineChina = echarts.init(document.getElementById('lineChina'), 'essosNew');
+        var chartLineChina = echarts.init(document.getElementById('lineChina'), 'essosNew');
         let optLineChina = {
             textStyle: {
                 fontFamily: 'OPPOSansM',
@@ -272,11 +266,11 @@
             },
             series: []
         }
-        lineChina.setOption(optLineChina);
+        chartLineChina.setOption(optLineChina);
         setLineChina('');
 
         // 设定 Part2 左侧部分分省折线图
-        var lineProvince = echarts.init(document.getElementById('lineProvince'), 'essosNew');
+        var chartLineProvince = echarts.init(document.getElementById('lineProvince'), 'essosNew');
         let optLineProvince = {
             textStyle: {
                 fontFamily: 'OPPOSansM',
@@ -355,9 +349,325 @@
             },
             series: []
         }
-        lineProvince.setOption(optLineProvince);
+        chartLineProvince.setOption(optLineProvince);
         setLineProvince('', '山东');
+
+        // 设定 Part2 右侧部分省内柱状图
+        var chartBarCity = echarts.init(document.getElementById('barCity'), 'essosNew');
+        let optBarCity = {
+            textStyle: {
+                fontFamily: 'OPPOSansM',
+                fontSize: 12
+            },
+            color: ['#893448', '#4688eb', '#d95850', '#000000'],
+            title: {
+                text: '[dataType]各地区最新 COVID-19 疫情数据',
+                top: 10,
+                textStyle: {
+                    color: '#893448',
+                    fontSize: 16
+                },
+                left: 'center'
+            },
+            legend: {
+                orient: 'vertical',
+                right: 20,
+                top: 50,
+                data: ["累计确诊", "累计治愈", "现存确诊", "累计死亡"]
+            },
+            grid: {
+                left: 50,
+                right: 20,
+                top: 50,
+                bottom: 60
+            },
+            toolbox: {
+                show: true,
+                orient: 'horizontal',
+                itemGap: 20,
+                right: 20,
+                top: 10,
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false
+                }
+            },
+            dataZoom: [
+                {
+                    show: true,
+                    type: 'slider',
+                    realtime: true,
+                    start: 0,
+                    end: 50
+                },
+                {
+                    show: true,
+                    type: 'inside',
+                    realtime: true,
+                    start: 0,
+                    end: 50
+                }
+            ],
+            xAxis: {
+                type: 'category',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                data: []
+            },
+            yAxis: [
+                {
+                    name: '人数',
+                    type: 'value'
+                }
+            ],
+            series: []
+        }
+        chartBarCity.setOption(optBarCity);
+        setBarCity('', '山东');
+
+        // 设定 Part3 左侧部分世界地图
+        var chartMapWorld = echarts.init(document.getElementById('mapWorld'), 'essos');
+        let optMapWorld = {
+            baseOption: {
+                // 设置时间轴属性
+                timeline: {
+                    left: 80,
+                    right: 0,
+                    bottom: -10,
+                    playInterval: 200,
+                    label: {
+                        fontSize: 12,
+                        position: 8,
+                        formatter: function (date) {
+                            return (new Date(date)).getMonth() + 1 + '.' + (new Date(date)).getDate();
+                        }
+                    },
+                    tooltip: {
+                        formatter: function (params) {
+                            return getFormatDate(params.name, '/');
+                        }
+                    },
+                    axisType: 'category',
+                    currentIndex: 0,
+                    data: [],
+                },
+                // 设置地图全局属性
+                textStyle: {
+                    fontFamily: 'OPPOSansM',
+                    fontSize: 12
+                },
+                title: {
+                    text: '全球 COVID-19 疫情数据 - [dataType]',
+                    subtext: '[currentDataDate]',
+                    left: 15,
+                    top: 15,
+                    textStyle: {
+                        color: '#893448',
+                        fontSize: 20
+                    },
+                    subtextStyle: {
+                        color: '#d95850',
+                        fontSize: 15
+                    }
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function (params) {
+                        return params.name + "：" + params.value;
+                    }
+                },
+                visualMap: {
+                    itemHeight: 120,
+                    min: 0,
+                    max: 5000,
+                    left: 15,
+                    bottom: 10,
+                    calculable: true,
+                    textStyle: {
+                        fontSize: 12
+                    }
+                },
+                nameMap: worldNameMap,
+                toolbox: {
+                    show: true,
+                    orient: 'horizontal',
+                    itemGap: 20,
+                    right: 0,
+                    top: 15,
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                series: [
+                    {
+                        name: '[]',
+                        type: 'map',
+                        mapType: 'world',
+                        zoom: 1,
+                        top: 70,
+                        label: {
+                            normal: {
+                                show: false
+                            },
+                            emphasis: {
+                                show: true
+                            }
+                        },
+                        data: []
+                    }
+                ]
+            },
+            options: []
+        };
+        chartMapWorld.setOption(optMapWorld);
+        // 获取数据并设置
+        setMapWorld(dataType);
+
+        // 设定 Part3 右侧部分世界前 10 个累计确诊最高的国家
+        var chartPieWorld = echarts.init(document.getElementById('pieWorld'), 'essos');
+        let optPieWorld = {
+            textStyle: {
+                fontFamily: 'OPPOSansM',
+                fontSize: 12
+            },
+            title: {
+                text: '全球最新累计确诊前 10 位国家',
+                left: 'center',
+                top: 10,
+                textStyle: {
+                    color: '#893448',
+                    fontSize: 16
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params) {
+                    console.log(params);
+                    return params.name + "：" + params.value;
+                }
+            },
+            toolbox: {
+                show: true,
+                orient: 'horizontal',
+                itemGap: 20,
+                right: 0,
+                top: 15,
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            legend: {
+                type: 'scroll',
+                orient: 'vertical',
+                left: 20,
+                top: 20,
+                bottom: 10,
+                data: []
+            },
+            series: {
+                type: 'pie',
+                radius: 90,
+                center: [280, 150],
+                top: 10,
+                data: []
+            }
+        };
+        chartPieWorld.setOption(optPieWorld);
+        // 获取数据并设置
+        setPieWorld('');
+
+        // 设定 Part4 全球数据折线图
+        var chartLineWorld = echarts.init(document.getElementById('lineWorld'), 'essosNew');
+        let optLineWorld = {
+            textStyle: {
+                fontFamily: 'OPPOSansM',
+                fontSize: 12
+            },
+            title: {
+                text: '全球 COVID-19 疫情数据',
+                top: 10,
+                textStyle: {
+                    color: '#893448',
+                    fontSize: 16
+                },
+                left: 'center'
+            },
+            legend: {
+                orient: 'horizontal',
+                right: 60,
+                top: 15,
+                data: ["累计确诊", "现存确诊", "累计治愈", "累计死亡"]
+            },
+            grid: {
+                left: 80,
+                right: 20,
+                top: 50,
+                bottom: 60
+            },
+            toolbox: {
+                show: true,
+                orient: 'horizontal',
+                itemGap: 20,
+                right: 20,
+                top: 10,
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false
+                }
+            },
+            dataZoom: [
+                {
+                    show: true,
+                    type: 'slider',
+                    realtime: true,
+                    start: 0,
+                    end: 100,
+                    labelFormatter: function (value) {
+                        var date = new Date('2020-01-22');
+                        date.setDate(date.getDate() + value);
+                        return (new Date(date)).getMonth() + 1 + '.' + (new Date(date)).getDate();
+                    }
+                },
+                {
+                    show: true,
+                    type: 'inside',
+                    realtime: true,
+                    start: 0,
+                    end: 100
+                }
+            ],
+            xAxis: {
+                type: 'category',
+                data: [],
+                axisLabel: {
+                    formatter: function (date) {
+                        return (new Date(date)).getMonth() + 1 + '.' + (new Date(date)).getDate();
+                    }
+                }
+            },
+            yAxis: {
+                name: '人数',
+                type: 'value'
+            },
+            series: []
+        }
+        chartLineWorld.setOption(optLineWorld);
+        setLineWorld('');
+
     </script>
+
+    <h4 style="text-align:center; margin-top:10px;">本 COVID-19 疫情数据可视化前端页面推荐使用分辨率 1366×768 或更高</h4>
 </body>
 
 </html>

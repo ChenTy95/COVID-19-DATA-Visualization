@@ -45,6 +45,23 @@ button {
     cursor: default;
 }
 
+#globalSelector :not(#dataTypeSelector2) {
+    width: 92px;
+}
+
+#dataTypeSelector2 {
+    width: 442px;
+    height: 40px;
+    margin: 15px 20px 10px 20px;
+    padding: 0;
+    border-width: 4px;
+    font-size: 18px;
+    font-weight: 900;
+    background-color: rgba(242, 234, 191, 1);
+    color: #893448;
+    cursor: default;
+}
+
 p {
     font-size: 18px;
     line-height: 18px;
