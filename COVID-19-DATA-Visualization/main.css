@@ -8,11 +8,6 @@
     src: url(font/OPPOSans-M.ttf)
 }
 
-@font-face {
-    font-family: OPPOSansH;
-    src: url(font/OPPOSans-H.ttf)
-}
-
 body {
     font-family: OPPOSansR;
     background-color: rgba(242, 234, 191, 0.3);
